@@ -9,13 +9,12 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
-# Copy package files (handles both root context and server context)
-COPY package*.json server/package*.json* ./
+# Copy server package files and install production dependencies
+COPY server/package*.json ./
 RUN npm ci --omit=dev || npm install --omit=dev
 
-# Copy source code
-COPY . .
-RUN if [ -d "server" ]; then cp -rf server/* .; fi
+# Copy server source code directly into /app
+COPY server/ ./
 
 # Create tmp and data directories for runtime HLS and SQLite storage
 RUN mkdir -p tmp data

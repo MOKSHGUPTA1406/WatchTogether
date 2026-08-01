@@ -17,7 +17,9 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3001;
 const rawOrigins = process.env.CLIENT_ORIGIN || '*';
+const CLIENT_ORIGIN = rawOrigins;
 const allowedOrigins = rawOrigins.split(',').map((s) => s.trim());
+
 
 const corsOriginCheck = (origin, callback) => {
   if (!origin || rawOrigins === '*' || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
@@ -87,6 +89,7 @@ server.listen(PORT, () => {
   console.log(`=================================`);
   console.log(` WatchTogether Server Running `);
   console.log(` Port: ${PORT}`);
-  console.log(` Client Origin: ${CLIENT_ORIGIN}`);
+  console.log(` Client Origin: ${rawOrigins}`);
   console.log(`=================================`);
 });
+
