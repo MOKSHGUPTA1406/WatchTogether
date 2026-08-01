@@ -3,7 +3,8 @@ services:
     name: watchtogether-server
     env: docker
     plan: free
-    dockerfilePath: ./server/Dockerfile
+    rootDir: server
+    dockerfilePath: Dockerfile
     healthCheckPath: /health
     envVars:
       - key: CLIENT_ORIGIN
