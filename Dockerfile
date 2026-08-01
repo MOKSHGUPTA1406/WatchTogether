@@ -15,7 +15,7 @@ RUN npm ci --omit=dev || npm install --omit=dev
 
 # Copy source code
 COPY . .
-RUN if [ -d "server" ]; then cp -rn server/* .; fi
+RUN if [ -d "server" ]; then cp -rf server/* .; fi
 
 # Create tmp and data directories for runtime HLS and SQLite storage
 RUN mkdir -p tmp data
