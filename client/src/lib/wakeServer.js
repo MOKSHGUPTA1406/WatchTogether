@@ -3,8 +3,9 @@
  * Handles Render free-tier cold-start wakeups (30-50s) with progress callbacks & retry logic.
  */
 export async function wakeServer(serverUrl, onProgress = null, maxTimeoutSec = 60) {
-  const targetUrl = `${serverUrl || 'http://localhost:3001'}/health`;
+  const targetUrl = `${serverUrl || 'http://localhost:3001'}/api/status`;
   const startTime = Date.now();
+
 
   console.log(`[WakeServer] Initiating health check ping to ${targetUrl}...`);
 
@@ -21,9 +22,9 @@ export async function wakeServer(serverUrl, onProgress = null, maxTimeoutSec = 6
 
       const response = await fetch(targetUrl, {
         method: 'GET',
-        signal: controller.signal,
-        headers: { 'Cache-Control': 'no-cache' }
+        signal: controller.signal
       });
+
 
       clearTimeout(timeoutId);
 

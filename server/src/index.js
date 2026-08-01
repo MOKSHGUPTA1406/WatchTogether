@@ -34,9 +34,11 @@ const corsOriginCheck = (origin, callback) => {
 
 app.use(cors({
   origin: corsOriginCheck,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'X-Requested-With'],
   credentials: true
 }));
+
 
 app.use(express.json());
 
