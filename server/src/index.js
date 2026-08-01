@@ -41,13 +41,16 @@ app.use(cors({
 app.use(express.json());
 
 // Trivial Health Check Endpoint (used by Render and Client Wake-Up flow)
-app.get('/health', (req, res) => {
+const handleHealth = (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: Date.now(),
     uptime: Math.floor(process.uptime())
   });
-});
+};
+app.get('/health', handleHealth);
+app.get('/api/status', handleHealth);
+
 
 // Attach Socket.io instance to Express app for route access
 
