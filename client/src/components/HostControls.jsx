@@ -113,15 +113,17 @@ export default function HostControls({
   }
 
   return (
-    <div className="glass-panel" style={{ padding: '0.8rem 1.2rem' }}>
+    <div className="glass-panel host-controls-container" style={{ padding: '0.8rem 1.2rem' }}>
       {/* Top Tab Bar */}
-      <div style={{
+      <div className="host-control-header" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '0.75rem'
+        marginBottom: '0.75rem',
+        flexWrap: 'wrap',
+        gap: '0.5rem'
       }}>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div className="host-control-tabs" style={{ display: 'flex', gap: '0.4rem', flex: 1 }}>
           <button
             type="button"
             onClick={() => setActiveTab('youtube')}
@@ -133,13 +135,15 @@ export default function HostControls({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.4rem',
               background: activeTab === 'youtube' ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
               color: activeTab === 'youtube' ? '#fff' : 'var(--text-dim)',
               border: activeTab === 'youtube' ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid transparent'
             }}
           >
-            <Youtube size={15} color={activeTab === 'youtube' ? '#ff0000' : 'currentColor'} /> YouTube Link
+            <Youtube size={15} color={activeTab === 'youtube' ? '#ff0000' : 'currentColor'} /> 
+            <span>YouTube Link</span>
           </button>
 
           <button
@@ -153,13 +157,15 @@ export default function HostControls({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.4rem',
               background: activeTab === 'upload' ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
               color: activeTab === 'upload' ? '#fff' : 'var(--text-dim)',
               border: activeTab === 'upload' ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid transparent'
             }}
           >
-            <Upload size={15} /> Upload Local Video
+            <Upload size={15} /> 
+            <span>Upload Local Video</span>
           </button>
 
           <button
@@ -173,15 +179,18 @@ export default function HostControls({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.4rem',
               background: activeTab === 'capture' ? 'rgba(236, 72, 153, 0.25)' : 'transparent',
               color: activeTab === 'capture' ? '#fff' : 'var(--text-dim)',
               border: activeTab === 'capture' ? '1px solid rgba(236, 72, 153, 0.4)' : '1px solid transparent'
             }}
           >
-            <Monitor size={15} color={activeTab === 'capture' ? '#ec4899' : 'currentColor'} /> Share Tab (Live WebRTC)
+            <Monitor size={15} color={activeTab === 'capture' ? '#ec4899' : 'currentColor'} /> 
+            <span>Share Tab (Live WebRTC)</span>
           </button>
         </div>
+
 
         {/* Quality Selector for Uploads */}
         {activeTab === 'upload' && (
@@ -209,13 +218,13 @@ export default function HostControls({
 
       {/* Tab 1: YouTube Form */}
       {activeTab === 'youtube' && (
-        <form onSubmit={handleYouTubeSubmit} style={{
+        <form onSubmit={handleYouTubeSubmit} className="host-tab-form" style={{
           display: 'flex',
           alignItems: 'center',
           gap: '0.8rem',
           flexWrap: 'wrap'
         }}>
-          <div style={{ flex: 1, minWidth: '240px', display: 'flex', gap: '0.5rem' }}>
+          <div className="host-tab-form-row" style={{ flex: 1, minWidth: '200px', display: 'flex', gap: '0.5rem' }}>
             <input
               type="text"
               className="input-field"
@@ -225,9 +234,9 @@ export default function HostControls({
                 setUrlInput(e.target.value);
                 setErrorMsg('');
               }}
-              style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem' }}
+              style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem', flex: 1, minWidth: 0 }}
             />
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}>
+            <button type="submit" className="btn btn-primary host-tab-action-btn" style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}>
               <Link2 size={16} /> Load Video
             </button>
           </div>
@@ -248,7 +257,7 @@ export default function HostControls({
 
       {/* Tab 2: Local Video Upload Form */}
       {activeTab === 'upload' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="host-tab-form" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -289,8 +298,8 @@ export default function HostControls({
 
       {/* Tab 3: Live Tab Share (WebRTC) */}
       {activeTab === 'capture' && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        <div className="host-tab-form" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="host-tab-desc" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', flex: 1, minWidth: '180px' }}>
             Share any browser tab with audio (Animepahe, Netflix, custom players) directly via 0-latency WebRTC.
           </div>
 
@@ -298,7 +307,7 @@ export default function HostControls({
             <button
               type="button"
               onClick={() => startCapture(roomId, startScreenShareMesh)}
-              className="btn btn-primary"
+              className="btn btn-primary host-tab-action-btn"
               style={{
                 background: 'linear-gradient(135deg, #ec4899 0%, #d946ef 100%)',
                 padding: '0.55rem 1.1rem',
@@ -308,6 +317,7 @@ export default function HostControls({
               <Radio size={16} /> Start WebRTC Tab Share
             </button>
           ) : (
+
             <button
               type="button"
               onClick={() => stopCapture(roomId, stopScreenShareMesh)}

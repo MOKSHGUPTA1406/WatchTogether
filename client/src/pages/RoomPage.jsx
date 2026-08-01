@@ -56,7 +56,7 @@ export default function RoomPage() {
   const memberList = Object.entries(members);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div className="room-page-container" style={{ display: 'flex', flexDirection: 'column', height: '100dvh', minHeight: '100dvh', width: '100vw', overflow: 'hidden' }}>
       {/* Top Navigation Bar */}
       <header className="glass" style={{
         height: '60px',
@@ -64,8 +64,10 @@ export default function RoomPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        zIndex: 10
+        zIndex: 10,
+        flexShrink: 0
       }}>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
           <Link to="/" className="btn btn-icon" title="Leave Room">
             <ArrowLeft size={20} />
@@ -137,6 +139,17 @@ export default function RoomPage() {
 
         {/* Left Side: Player, Controls & Voice/Members */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', overflow: 'hidden' }}>
+          {/* Video Player Engine (FIRST AT TOP) */}
+          <PlayerPanel
+            roomState={roomState}
+            isHost={isHost}
+            play={play}
+            pause={pause}
+            seek={seek}
+            localScreenStream={localScreenStream}
+            remoteScreenStream={remoteScreenStream}
+          />
+
           {/* Host Control Bar */}
           <HostControls
             isHost={isHost}
@@ -147,16 +160,6 @@ export default function RoomPage() {
             stopScreenShareMesh={stopScreenShareMesh}
           />
 
-          {/* Video Player Engine */}
-          <PlayerPanel
-            roomState={roomState}
-            isHost={isHost}
-            play={play}
-            pause={pause}
-            seek={seek}
-            localScreenStream={localScreenStream}
-            remoteScreenStream={remoteScreenStream}
-          />
 
           {/* Voice Chat Panel */}
           <VoicePanel

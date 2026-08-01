@@ -102,28 +102,30 @@ export default function PlayerPanel({
       background: '#000',
       borderRadius: 'var(--radius-md)'
     }}>
-      {/* WebRTC Live Screen Share Banner */}
+      {/* WebRTC Live Screen Share Banner (PiP Overlay) */}
       {sourceType === 'capture' && (
         <div style={{
           position: 'absolute',
-          top: '0.8rem',
-          left: '0.8rem',
-          zIndex: 10,
-          background: 'rgba(236, 72, 153, 0.25)',
-          border: '1px solid rgba(236, 72, 153, 0.4)',
+          top: '12px',
+          right: '12px',
+          zIndex: 20,
+          background: 'rgba(9, 12, 20, 0.85)',
+          border: '1px solid rgba(236, 72, 153, 0.5)',
           color: '#f472b6',
-          padding: '0.35rem 0.8rem',
-          borderRadius: 'var(--radius-full)',
+          padding: '0.4rem 0.85rem',
+          borderRadius: '12px',
           fontSize: '0.78rem',
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',
-          gap: '0.4rem',
-          backdropFilter: 'blur(8px)'
+          gap: '0.45rem',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(10px)'
         }}>
           <Radio size={14} /> ⚡ WebRTC Live HD — 0 Latency
         </div>
       )}
+
 
       {sourceType === 'youtube' && roomState?.sourceUrl ? (
         <YouTubePlayer

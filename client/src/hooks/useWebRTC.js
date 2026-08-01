@@ -9,6 +9,49 @@ const RTC_CONFIG = {
   ]
 };
 
+let globalAudioCtx = null;
+
+function getGlobalAudioContext() {
+  if (!globalAudioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      globalAudioCtx = new AudioContextClass();
+    }
+  }
+  if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+    globalAudioCtx.resume().catch(() => {});
+  }
+  return globalAudioCtx;
+}
+
+function attachRemoteVoiceStream(targetSocketId, stream) {
+  let audioElement = document.getElementById(`audio-peer-${targetSocketId}`);
+  if (!audioElement) {
+    audioElement = document.createElement('audio');
+    audioElement.id = `audio-peer-${targetSocketId}`;
+    audioElement.autoplay = true;
+    audioElement.playsInline = true;
+    audioElement.style.display = 'none';
+    document.body.appendChild(audioElement);
+  }
+  audioElement.srcObject = stream;
+  audioElement.play().catch((err) => {
+    console.warn('[Voice Autoplay HTML5 Blocked, trying AudioContext]', err);
+  });
+
+  try {
+    const ctx = getGlobalAudioContext();
+    if (ctx) {
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(ctx.destination);
+      console.log(`[WebRTC Voice] AudioContext stream connected for peer ${targetSocketId}`);
+    }
+  } catch (e) {
+    console.warn('[AudioContext connect error]', e);
+  }
+}
+
+
 export function useWebRTC(roomId, socketId, roomState = null) {
   // Screen Share WebRTC State
   const [localScreenStream, setLocalScreenStream] = useState(null);
@@ -80,15 +123,10 @@ export function useWebRTC(roomId, socketId, roomState = null) {
         setRemoteScreenStream(stream);
       } else if (streamType === 'voice') {
         const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
-        let audioElement = document.getElementById(`audio-peer-${targetSocketId}`);
-        if (!audioElement) {
-          audioElement = document.createElement('audio');
-          audioElement.id = `audio-peer-${targetSocketId}`;
-          audioElement.autoplay = true;
-          document.body.appendChild(audioElement);
-        }
-        audioElement.srcObject = stream;
+        attachRemoteVoiceStream(targetSocketId, stream);
       }
+
+
     };
 
     pc.onconnectionstatechange = () => {
@@ -125,8 +163,10 @@ export function useWebRTC(roomId, socketId, roomState = null) {
   useEffect(() => {
     if (!roomId) return;
 
-    // Join screen signaling group
+    // Join screen and voice signaling groups on room mount
     socket.emit('webrtc:join', { roomId, streamType: 'screen' });
+    socket.emit('webrtc:join', { roomId, streamType: 'voice' });
+
 
     // Handle existing peers when joining signaling channel
     const onPeers = async ({ peers, streamType }) => {
@@ -171,6 +211,12 @@ export function useWebRTC(roomId, socketId, roomState = null) {
         pc = createPeerConnection(senderSocketId, streamType, localStream);
       }
 
+      // Ignore offer if peer connection is already processing an offer/answer
+      if (pc.signalingState !== 'stable') {
+        console.warn(`[WebRTC Offer Ignored] Connection to ${senderSocketId} is in state: ${pc.signalingState}`);
+        return;
+      }
+
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
         // Flush any ICE candidates that arrived before remote description was set
@@ -194,15 +240,20 @@ export function useWebRTC(roomId, socketId, roomState = null) {
       console.log(`[WebRTC Answer Received] From ${senderSocketId} (${streamType})`);
       const peersMap = streamType === 'screen' ? screenPeersRef.current : voicePeersRef.current;
       const pc = peersMap.get(senderSocketId);
-      if (pc) {
+
+      // Only set remote description if connection is expecting an answer (have-local-offer)
+      if (pc && pc.signalingState === 'have-local-offer') {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
           await flushIceCandidates(senderSocketId, streamType, pc);
         } catch (err) {
           console.error(`[WebRTC SetRemote Description Error] From ${senderSocketId}:`, err);
         }
+      } else if (pc) {
+        console.warn(`[WebRTC Answer Ignored] Connection state is ${pc.signalingState}, expected have-local-offer`);
       }
     };
+
 
     // Handle incoming ICE Candidates
     const onIce = async ({ senderSocketId, candidate, streamType }) => {
@@ -302,11 +353,40 @@ export function useWebRTC(roomId, socketId, roomState = null) {
       setIsVoiceConnected(true);
       setIsMuted(false);
 
+      // Attach local mic tracks to any existing voice peer connections & renegotiate
+      for (const [peerId, pc] of voicePeersRef.current.entries()) {
+        audioStream.getAudioTracks().forEach((track) => {
+          pc.addTrack(track, audioStream);
+        });
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          socket.emit('webrtc:offer', {
+            roomId,
+            targetSocketId: peerId,
+            sdp: offer,
+            streamType: 'voice'
+          });
+        } catch (e) {
+          console.warn('[Voice Offer Error]', e);
+        }
+      }
+
+      // Unlock Web Audio API context under user gesture
+      getGlobalAudioContext();
+
+      // Resume/play all remote audio elements under user gesture context
+      document.querySelectorAll('audio[id^="audio-peer-"]').forEach((el) => {
+        el.play().catch((err) => console.warn('[Audio Play Error]', err));
+      });
+
+
       socket.emit('webrtc:join', { roomId, streamType: 'voice' });
     } catch (err) {
       console.error('[Voice Error] Failed to access microphone:', err);
     }
   }, [roomId]);
+
 
   const leaveVoice = useCallback(() => {
     if (localVoiceStreamRef.current) {
