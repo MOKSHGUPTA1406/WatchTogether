@@ -9,17 +9,18 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install production dependencies
-COPY package*.json ./
+# Copy package files (handles both root context and server context)
+COPY package*.json server/package*.json* ./
 RUN npm ci --omit=dev || npm install --omit=dev
 
-# Copy server source code
+# Copy source code
 COPY . .
+RUN if [ -d "server" ]; then cp -rn server/* .; fi
 
 # Create tmp and data directories for runtime HLS and SQLite storage
 RUN mkdir -p tmp data
 
-# Expose server port (default 3001)
+# Expose server port
 EXPOSE 3001
 
 # Environment variables
