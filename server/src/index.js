@@ -50,8 +50,10 @@ const handleHealth = (req, res) => {
     uptime: Math.floor(process.uptime())
   });
 };
+app.get('/ping', handleHealth);
 app.get('/health', handleHealth);
 app.get('/api/status', handleHealth);
+
 
 
 // Attach Socket.io instance to Express app for route access
