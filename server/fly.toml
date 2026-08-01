@@ -1,0 +1,20 @@
+app = "watchtogether-server-moksh"
+primary_region = "iad"
+
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3001"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

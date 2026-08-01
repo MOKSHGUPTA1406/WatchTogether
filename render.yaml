@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: watchtogether-server
+    env: docker
+    plan: free
+    dockerfilePath: ./server/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: CLIENT_ORIGIN
+        value: https://client-one-xi-99.vercel.app
